@@ -88,3 +88,37 @@ def print_quick_categoricals(df: pd.DataFrame, topk: int = 10) -> None:
         vc = df[c].value_counts(dropna=False).head(topk)
         print(f"\nTop {topk} '{c}' values:")
         print(vc.to_string())
+
+# ---------- (2) “HOW FAR USERS GOT IN WATCHING ANIME” PIPELINE ----------
+def _gt0(s: pd.Series) -> pd.Series:
+    return (s.fillna(0) > 0)
+
+def compute_user_stage(df: pd.DataFrame) -> pd.Series:
+    """
+    Assign each user a single 'furthest progress stage'. Priority order:
+    Completed ≥1 > Watching ≥1 > Started (On-Hold) > Started (Dropped) > Plan only > No activity.
+    """
+    has_completed = _gt0(df.get("user_completed", pd.Series(dtype="Int64")))
+    has_watching  = _gt0(df.get("user_watching",  pd.Series(dtype="Int64")))
+    has_onhold    = _gt0(df.get("user_onhold",    pd.Series(dtype="Int64")))
+    has_dropped   = _gt0(df.get("user_dropped",   pd.Series(dtype="Int64")))
+    has_ptw       = _gt0(df.get("user_plantowatch", pd.Series(dtype="Int64")))
+    any_activity  = has_completed | has_watching | has_onhold | has_dropped | has_ptw
+
+    stage = pd.Series("No list activity", index=df.index, dtype="string")
+    stage = stage.mask(any_activity & has_ptw & ~(has_watching | has_completed | has_onhold | has_dropped), "Plan to Watch only")
+    stage = stage.mask(any_activity & has_dropped & ~(has_watching | has_completed), "Started (Dropped)")
+    stage = stage.mask(any_activity & has_onhold  & ~(has_watching | has_completed), "Started (On-Hold)")
+    stage = stage.mask(has_watching & ~has_completed, "Watching ≥1")
+    stage = stage.mask(has_completed, "Completed ≥1")
+
+    # Categorical ordering for nice sorting
+    stage = stage.astype(pd.CategoricalDtype(ordered=True, categories=[
+        "Plan to Watch only",
+        "Started (Dropped)",
+        "Started (On-Hold)",
+        "Watching ≥1",
+        "Completed ≥1",
+        "No list activity",
+    ]))
+    return stage
