@@ -1,0 +1,64 @@
+PS C:\Users\gnypj\PycharmProjects\Anime_project> python data_preprocessing.py raw_data/UserList.csv
+Loaded 302,675 rows and 17 columns.
+
+Top 10 'username' values:
+username
+mini_kaila          1
+karthiga            1
+RedvelvetDaisuki    1
+Queenjdlols         1
+Scarlet95           1
+ragingasian         1
+ammaretto           1
+Grawne              1
+randomuser11        1
+bumcakee            1
+
+Top 10 'gender' values:
+gender
+Male          135181
+NaN            84875
+Female         81374
+Non-Binary      1245
+
+Top 10 'location' values:
+location
+NaN            145880
+Poland           2425
+Germany          1947
+Canada           1821
+California       1510
+Brazil           1459
+France           1135
+Philippines      1077
+Australia        1032
+Sweden           1013
+
+Top 10 'access_rank' values:
+access_rank
+NaN    302675
+
+=== Stage distribution ===
+             stage  count  pct_of_users
+      Completed ≥1 277271         91.61
+  No list activity  19628          6.48
+       Watching ≥1   4537          1.50
+Plan to Watch only    946          0.31
+ Started (On-Hold)    250          0.08
+ Started (Dropped)     43          0.01
+
+=== Funnel (counts) ===
+                  step  count  pct_of_users  pct_of_prev_step
+          Any activity 283047         93.52               NaN
+               Started 282101         93.20             99.67
+          Watching now 260888         86.19             92.48
+          Completed ≥1 277271         91.61            106.28
+Dropped ≥1 (side exit) 189059         62.46               NaN
+On-Hold ≥1 (side exit) 195697         64.66               NaN
+
+=== Funnel (percentages of users / previous step) ===
+        step  pct_of_users  pct_of_prev_step
+Any activity         93.52               NaN
+     Started         93.20             99.67
+Watching now         86.19             92.48
+Completed ≥1         91.61            106.28
