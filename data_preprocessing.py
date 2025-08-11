@@ -4,7 +4,7 @@ Analyze anime portal Users CSV:
 2) Build a pipeline of how far users got with watching anime.
 
 Usage:
-    python analyze_anime_users.py path/to/users.csv
+    python data_preprocessing.py raw_data/UserList.csv
 
 Outputs (printed + CSVs):
     - profile_missing.csv
@@ -207,4 +207,4 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Please provide the path to the users CSV.\nExample:\n  python analyze_anime_users.py data/users.csv")
         sys.exit(1)
-    analyze(sys.argv[1])
+    analyze(csv_path=sys.argv[1], out_dir='user_list_analysis')
