@@ -122,3 +122,45 @@ def compute_user_stage(df: pd.DataFrame) -> pd.Series:
         "No list activity",
     ]))
     return stage
+
+def compute_funnel(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Funnel steps:
+        Step 0: Any activity (any of the 5 list counters > 0)
+        Step 1: Started (watching + completed + onhold + dropped > 0)
+        Step 2: Currently watching (user_watching > 0)
+        Step 3: Completed something (user_completed > 0)
+    Side exits (not steps but context): Dropped > 0, On-hold > 0
+    """
+    has_ptw = _gt0(df.get("user_plantowatch", pd.Series(dtype="Int64")))
+    started = _gt0(df.get("user_watching", pd.Series(dtype="Int64"))) \
+            | _gt0(df.get("user_completed", pd.Series(dtype="Int64"))) \
+            | _gt0(df.get("user_onhold", pd.Series(dtype="Int64"))) \
+            | _gt0(df.get("user_dropped", pd.Series(dtype="Int64")))
+    any_activity = started | has_ptw
+    watching_now = _gt0(df.get("user_watching", pd.Series(dtype="Int64")))
+    completed    = _gt0(df.get("user_completed", pd.Series(dtype="Int64")))
+    dropped_any  = _gt0(df.get("user_dropped", pd.Series(dtype="Int64")))
+    onhold_any   = _gt0(df.get("user_onhold", pd.Series(dtype="Int64")))
+
+    counts = pd.DataFrame({
+        "step": ["Any activity", "Started", "Watching now", "Completed ≥1", "Dropped ≥1 (side exit)", "On-Hold ≥1 (side exit)"],
+        "count": [
+            int(any_activity.sum()),
+            int(started.sum()),
+            int(watching_now.sum()),
+            int(completed.sum()),
+            int(dropped_any.sum()),
+            int(onhold_any.sum()),
+        ],
+    })
+    total_users = len(df)
+    counts["pct_of_users"] = (counts["count"] / total_users * 100).round(2)
+    # Percent of previous step for the core funnel (first 4 rows)
+    prev = counts.loc[:3, "count"].shift(1)
+    counts.loc[:3, "pct_of_prev_step"] = (counts.loc[:3, "count"] / prev * 100).round(2)
+    counts.loc[counts.index[0], "pct_of_prev_step"] = np.nan  # N/A for first step
+
+    # Percentage table only for the four core steps
+    funnel_pct = counts.loc[:3, ["step", "pct_of_users", "pct_of_prev_step"]].reset_index(drop=True)
+    return counts, funnel_pct
