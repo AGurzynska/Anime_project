@@ -28,3 +28,19 @@ NUMERIC_INT_COLS = [
 NUMERIC_FLOAT_COLS = ["stats_mean_score", "user_days_spent_watching"]
 DATE_COLS = ["birth_date", "join_date", "last_online"]
 CAT_COLS = ["username", "gender", "location", "access_rank"]
+
+def load_users_csv(path: str | Path) -> pd.DataFrame:
+    """Load CSV, parse dates, and coerce numerics safely."""
+    df = pd.read_csv(path, dtype=str, keep_default_na=False, na_values=["", "NA", "NaN", "null", "None"])
+    # Coerce numerics
+    for c in NUMERIC_INT_COLS:
+        if c in df:
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype("Int64")
+    for c in NUMERIC_FLOAT_COLS:
+        if c in df:
+            df[c] = pd.to_numeric(df[c], errors="coerce").astype("Float64")
+    # Parse dates
+    for c in DATE_COLS:
+        if c in df:
+            df[c] = pd.to_datetime(df[c], errors="coerce", utc=True)
+    return df
