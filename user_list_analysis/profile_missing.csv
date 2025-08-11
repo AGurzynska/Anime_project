@@ -1,0 +1,18 @@
+column,dtype,non_null,missing,missing_pct
+access_rank,object,0,302675,1.0
+location,object,156795,145880,0.482
+birth_date,"datetime64[ns, UTC]",168741,133934,0.4425
+gender,object,217800,84875,0.2804
+join_date,"datetime64[ns, UTC]",302546,129,0.0004
+last_online,"datetime64[ns, UTC]",302546,129,0.0004
+stats_episodes,Int64,302546,129,0.0004
+stats_mean_score,Float64,302546,129,0.0004
+stats_rewatched,Int64,302546,129,0.0004
+user_completed,Int64,302675,0,0.0
+user_days_spent_watching,Float64,302675,0,0.0
+user_dropped,Int64,302675,0,0.0
+user_id,Int64,302675,0,0.0
+user_onhold,Int64,302675,0,0.0
+user_plantowatch,Int64,302675,0,0.0
+user_watching,Int64,302675,0,0.0
+username,object,302674,1,0.0

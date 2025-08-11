@@ -1,0 +1,7 @@
+step,count,pct_of_users,pct_of_prev_step
+Any activity,283047,93.52,
+Started,282101,93.2,99.67
+Watching now,260888,86.19,92.48
+Completed ≥1,277271,91.61,106.28
+Dropped ≥1 (side exit),189059,62.46,
+On-Hold ≥1 (side exit),195697,64.66,
