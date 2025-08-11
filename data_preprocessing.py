@@ -63,3 +63,20 @@ def profile_uniques(df: pd.DataFrame) -> pd.DataFrame:
         "column": df.columns,
         "n_unique": [df[c].nunique(dropna=True) for c in df.columns]
     }).sort_values(["n_unique", "column"], ascending=[False, True], ignore_index=True)
+
+def profile_numeric_stats(df: pd.DataFrame) -> pd.DataFrame:
+    """Create statistics for columns with numerical data"""
+    num_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+    if not num_cols:
+        return pd.DataFrame(columns=["column"])
+    desc = df[num_cols].describe(percentiles=[0.25, 0.5, 0.75]).T
+    desc = desc.rename(columns={
+        "50%": "median", "25%": "p25", "75%": "p75"
+    })
+    # Add additional robust stats
+    desc["missing"] = df[num_cols].isna().sum()
+    desc["missing_pct"] = (desc["missing"] / len(df)).round(4)
+    desc["zeros"] = (df[num_cols] == 0).sum()
+    desc["nonzero_pct"] = (1 - (desc["zeros"] / desc["count"])).round(4)
+    desc.index.name = "column"
+    return desc.reset_index()
