@@ -56,3 +56,10 @@ def profile_missing(df: pd.DataFrame) -> pd.DataFrame:
     })
     out["missing_pct"] = (out["missing"] / len(df)).round(4)
     return out.sort_values(["missing_pct", "column"], ascending=[False, True], ignore_index=True)
+
+def profile_uniques(df: pd.DataFrame) -> pd.DataFrame:
+    """Creates a DF with unique values for each column"""
+    return pd.DataFrame({
+        "column": df.columns,
+        "n_unique": [df[c].nunique(dropna=True) for c in df.columns]
+    }).sort_values(["n_unique", "column"], ascending=[False, True], ignore_index=True)
