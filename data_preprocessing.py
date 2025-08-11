@@ -80,3 +80,11 @@ def profile_numeric_stats(df: pd.DataFrame) -> pd.DataFrame:
     desc["nonzero_pct"] = (1 - (desc["zeros"] / desc["count"])).round(4)
     desc.index.name = "column"
     return desc.reset_index()
+
+def print_quick_categoricals(df: pd.DataFrame, topk: int = 10) -> None:
+    """Print info on categorical variables"""
+    cat_cols = [c for c in df.columns if c in CAT_COLS and c in df]
+    for c in cat_cols:
+        vc = df[c].value_counts(dropna=False).head(topk)
+        print(f"\nTop {topk} '{c}' values:")
+        print(vc.to_string())
