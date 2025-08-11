@@ -44,3 +44,15 @@ def load_users_csv(path: str | Path) -> pd.DataFrame:
         if c in df:
             df[c] = pd.to_datetime(df[c], errors="coerce", utc=True)
     return df
+
+# ---------- (1) DATA PROFILE ----------
+def profile_missing(df: pd.DataFrame) -> pd.DataFrame:
+    """Create a CSV with data types and info on missing data for each column"""
+    out = pd.DataFrame({
+        "column": df.columns,
+        "dtype": [df[c].dtype for c in df.columns],
+        "non_null": df.notna().sum().values,
+        "missing": df.isna().sum().values,
+    })
+    out["missing_pct"] = (out["missing"] / len(df)).round(4)
+    return out.sort_values(["missing_pct", "column"], ascending=[False, True], ignore_index=True)
