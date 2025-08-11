@@ -164,3 +164,47 @@ def compute_funnel(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     # Percentage table only for the four core steps
     funnel_pct = counts.loc[:3, ["step", "pct_of_users", "pct_of_prev_step"]].reset_index(drop=True)
     return counts, funnel_pct
+
+def analyze(csv_path: str | Path, out_dir: str | Path | None = None) -> None:
+    out_dir = Path(out_dir or Path(csv_path).parent)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    df = load_users_csv(csv_path)
+    print(f"Loaded {len(df):,} rows and {df.shape[1]} columns.")
+
+    # (1) Profile
+    missing = profile_missing(df)
+    uniques = profile_uniques(df)
+    numeric = profile_numeric_stats(df)
+
+    # Save profiles
+    missing.to_csv(out_dir / "profile_missing.csv", index=False)
+    uniques.to_csv(out_dir / "profile_uniques.csv", index=False)
+    numeric.to_csv(out_dir / "profile_numeric_stats.csv", index=False)
+
+    # Quick categorical peek in console
+    print_quick_categoricals(df, topk=10)
+
+    # (2) Stages + Funnel
+    stage = compute_user_stage(df)
+    stage_counts = stage.value_counts(dropna=False).rename_axis("stage").reset_index(name="count")
+    stage_counts["pct_of_users"] = (stage_counts["count"] / len(df) * 100).round(2)
+    stage_counts.to_csv(out_dir / "stage_distribution.csv", index=False)
+
+    funnel_counts, funnel_pct = compute_funnel(df)
+    funnel_counts.to_csv(out_dir / "funnel_counts.csv", index=False)
+    funnel_pct.to_csv(out_dir / "funnel_percentages.csv", index=False)
+
+    # Console summary
+    print("\n=== Stage distribution ===")
+    print(stage_counts.to_string(index=False))
+    print("\n=== Funnel (counts) ===")
+    print(funnel_counts.to_string(index=False))
+    print("\n=== Funnel (percentages of users / previous step) ===")
+    print(funnel_pct.to_string(index=False))
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Please provide the path to the users CSV.\nExample:\n  python analyze_anime_users.py data/users.csv")
+        sys.exit(1)
+    analyze(sys.argv[1])
